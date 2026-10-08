@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fantasy Draft 101 — a beginner's guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-deep:#0F3D2E;
+    --pitch-mid:#1C5F41;
+    --chalk:#F4F6EF;
+    --lime:#C6FF5E;
+    --ink:#10141A;
+    --gold:#FFC93C;
+    --line: rgba(244,246,239,0.28);
+    --shadow-hard: 6px 6px 0 var(--ink);
+    --accent: var(--lime);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--chalk);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+  body[data-sport="nfl"]{ --accent:#FF8A3D; --pitch-deep:#1A3A1F; --pitch-mid:#2B5C32; }
+  body[data-sport="nba"]{ --accent:#FF6B5E; --pitch-deep:#2A1708; --pitch-mid:#C98A4B; }
+  h1,h2,h3, .display{
+    font-family:'Bebas Neue', sans-serif;
+    letter-spacing:0.01em;
+    line-height:0.95;
+  }
+  a{color:inherit;}
+  img,svg{display:block; max-width:100%;}
+  .wrap{ max-width:1080px; margin:0 auto; padding:0 24px; }
+  :focus-visible{ outline:3px solid var(--gold); outline-offset:3px; }
+  body:not([data-sport="soccer"]) .soccer-only{display:none !important;}
+  body:not([data-sport="nfl"]) .nfl-only{display:none !important;}
+  body:not([data-sport="nba"]) .nba-only{display:none !important;}
+
+  /* ---------- NAV ---------- */
+  .nav{ position:sticky; top:0; z-index:50; background:var(--pitch-deep); border-bottom:3px solid var(--accent); transition:background .2s ease, border-color .2s ease; }
+  .nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:14px 24px; flex-wrap:wrap; gap:14px; }
+  .nav-mark{ color:var(--chalk); font-family:'Bebas Neue', sans-serif; font-size:1.4rem; display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .nav-mark .dot{ width:14px; height:14px; border-radius:50%; background:var(--accent); transition:background .2s ease; }
+  .nav-links{ display:flex; gap:22px; list-style:none; }
+  .nav-links a{ color:var(--chalk); text-decoration:none; font-size:0.92rem; font-weight:600; padding-bottom:3px; border-bottom:2px solid transparent; transition:border-color .15s ease; }
+  .nav-links a:hover{border-color:var(--accent);}
+  @media (max-width:760px){ .nav-links{display:none;} }
+
+  /* ---------- SPORT TABS ---------- */
+  .sport-tabs{ display:flex; gap:8px; }
+  .sport-tab{
+    font-family:'Inter',sans-serif; font-weight:800; font-size:0.82rem;
+    background:transparent; color:var(--chalk); border:2px solid var(--line);
+    padding:8px 16px; border-radius:100px; cursor:pointer;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  .sport-tab[aria-pressed="true"]{ background:var(--accent); color:var(--ink); border-color:var(--accent); }
+  .sport-tab:hover:not([aria-pressed="true"]){ border-color:var(--chalk); }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:
+      repeating-linear-gradient(90deg, transparent 0 118px, var(--line) 118px 119px),
+      linear-gradient(180deg, var(--pitch-deep) 0%, var(--pitch-mid) 100%);
+    color:var(--chalk); position:relative; padding:40px 0 96px; border-bottom:6px solid var(--ink);
+    transition:background .2s ease;
+  }
+  .hero::after{ content:""; position:absolute; left:50%; top:0; bottom:0; width:2px; background:var(--line); transform:translateX(-50%); }
+  .hero::before{ content:""; position:absolute; left:50%; top:62%; width:150px; height:150px; margin-left:-75px; margin-top:-75px; border:2px solid var(--line); border-radius:50%; }
+  .hero-inner{position:relative; z-index:2; padding-top:36px;}
+  .kicker{ display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:var(--ink); font-weight:800; font-size:0.78rem; padding:6px 12px; border-radius:100px; margin-bottom:22px; transition:background .2s ease; }
+  .kicker svg{width:14px; height:14px;}
+  h1.display{ font-size:clamp(2.6rem, 8vw, 5.6rem); max-width:13ch; }
+  .hero p.lede{ max-width:54ch; font-size:1.1rem; color:#DCE7DA; margin-top:18px; }
+  .hero-stats{ display:flex; flex-wrap:wrap; gap:14px; margin-top:40px; }
+  .stat-chip{ background:rgba(244,246,239,0.08); border:1px solid var(--line); border-radius:10px; padding:14px 18px; min-width:140px; }
+  .stat-chip .num{ font-family:'Bebas Neue', sans-serif; font-size:2.1rem; color:var(--accent); line-height:1; }
+  .stat-chip .lbl{ font-size:0.8rem; color:#C9D6C6; margin-top:4px; }
+
+  /* ---------- SECTION SHELL ---------- */
+  section{padding:70px 0;}
+  .section-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:36px; border-bottom:3px solid var(--ink); padding-bottom:16px; }
+  .section-head h2{ font-size:clamp(2.1rem, 4.5vw, 3rem); }
+  .section-num{ font-family:'Bebas Neue', sans-serif; font-size:1rem; color:#5b6459; letter-spacing:0.08em; }
+  .section-alt{background:var(--ink); color:var(--chalk);}
+  .section-alt .section-head{border-bottom-color:var(--chalk);}
+  .section-alt .section-num{color:#8b9488;}
+
+  /* ---------- INTRO ---------- */
+  .intro-grid{ display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:start; }
+  .intro-grid p{max-width:56ch; margin-bottom:16px; font-size:1.04rem;}
+  .intro-grid p strong{background:linear-gradient(transparent 60%, var(--gold) 60%);}
+  .fact-card{ background:var(--chalk); border:2px solid var(--ink); box-shadow:var(--shadow-hard); padding:22px; border-radius:2px; }
+  .fact-card h3{font-size:1.5rem; margin-bottom:10px;}
+  .fact-card ul{padding-left:20px; font-size:0.96rem;}
+  .fact-card li{margin-bottom:8px;}
+  @media (max-width:780px){ .intro-grid{grid-template-columns:1fr;} }
+
+  /* ---------- DRAFT BOARD (snake) ---------- */
+  .board-note{max-width:60ch; margin-bottom:30px; font-size:1.02rem;}
+  .snake{ display:flex; flex-direction:column; gap:6px; border:2px solid var(--ink); background:var(--pitch-deep); padding:18px; overflow-x:auto; transition:background .2s ease; }
+  .snake-row{ display:flex; gap:6px; }
+  .snake-row.reverse{flex-direction:row-reverse;}
+  .pick{ flex:1 0 84px; background:var(--pitch-mid); color:var(--chalk); border:1px solid var(--line); border-radius:6px; padding:10px 8px; text-align:center; font-size:0.78rem; position:relative; transition:background .2s ease; }
+  .pick .n{ display:block; font-family:'Bebas Neue',sans-serif; font-size:1.3rem; color:var(--accent); }
+  .pick.you{ background:var(--gold); color:var(--ink); border-color:var(--ink); font-weight:700; }
+  .pick.you .n{color:var(--ink);}
+  .snake-legend{ display:flex; gap:22px; margin-top:16px; font-size:0.86rem; flex-wrap:wrap; }
+  .swatch{ display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+
+  /* ---------- FIELD / COURT VISUALS ---------- */
+  .pitch-wrap{ display:grid; grid-template-columns:1fr 1fr; gap:44px; align-items:center; }
+  @media (max-width:780px){ .pitch-wrap{grid-template-columns:1fr;} }
+  .field{ border:3px solid var(--chalk); border-radius:8px; aspect-ratio:3/4; position:relative; padding:22px 14px; display:flex; flex-direction:column; justify-content:space-between; }
+  .field.soccer{ background: repeating-linear-gradient(0deg, #1E6A48 0 46px, #1B5E3F 46px 92px); }
+  .field.soccer::before{ content:""; position:absolute; left:50%; top:50%; width:74px; height:74px; margin:-37px 0 0 -37px; border:2px solid rgba(244,246,239,0.6); border-radius:50%; }
+  .field.nfl{ background: repeating-linear-gradient(0deg, #2B5C32 0 36px, #255329 36px 72px); }
+  .field.nfl::before{ content:""; position:absolute; left:10px; right:10px; top:10px; height:34px; background:rgba(255,138,61,0.22); border:1px dashed rgba(244,246,239,0.5); }
+  .field.nfl::after{ content:""; position:absolute; left:10px; right:10px; bottom:10px; height:34px; background:rgba(255,138,61,0.22); border:1px dashed rgba(244,246,239,0.5); }
+  .field.nba{ background:#C98A4B; }
+  .field.nba::before{ content:""; position:absolute; left:50%; top:50%; width:64px; height:64px; margin:-32px 0 0 -32px; border:2px solid rgba(244,246,239,0.65); border-radius:50%; }
+  .field.nba::after{ content:""; position:absolute; left:50%; bottom:10px; width:120px; height:150px; margin-left:-60px; border:2px solid rgba(244,246,239,0.5); border-top:none; border-radius:0 0 4px 4px; }
+  .prow{display:flex; justify-content:space-evenly; position:relative; z-index:2;}
+  .player-dot{ width:34px; height:34px; border-radius:50%; background:var(--chalk); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:0.66rem; font-weight:800; border:2px solid var(--ink); }
+  .player-dot.gk{background:var(--gold);}
+  .formation-list{list-style:none;}
+  .formation-list li{ display:flex; justify-content:space-between; align-items:baseline; padding:14px 0; border-bottom:1px solid #d8ddd2; }
+  .formation-list li:first-child{padding-top:0;}
+  .formation-list .role{font-weight:700; font-size:1.05rem;}
+  .formation-list .count{ font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--pitch-mid); }
+  .formation-list .desc{ display:block; font-size:0.86rem; color:#4b544a; font-weight:400; margin-top:2px; }
+
+  /* ---------- SCORING ---------- */
+  .score-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:16px; }
+  .score-card{ background:var(--chalk); border:2px solid var(--ink); padding:18px 20px; border-radius:2px; position:relative; }
+  .score-card .pts{ font-family:'Bebas Neue', sans-serif; font-size:2.4rem; color:var(--pitch-mid); }
+  .score-card.neg .pts{color:#B23A3A;}
+  .score-card .what{font-weight:700; font-size:0.98rem; margin-top:2px;}
+  .score-card .why{font-size:0.86rem; color:#4b544a; margin-top:6px;}
+
+  /* ---------- TIPS (sticky notes) ---------- */
+  .tip-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:22px; }
+  .tip{ background:var(--gold); padding:22px; min-height:170px; box-shadow:var(--shadow-hard); display:flex; flex-direction:column; justify-content:space-between; }
+  .tip:nth-child(2n){background:var(--accent);}
+  .tip:nth-child(3n){background:var(--chalk); border:2px solid var(--ink);}
+  .tip .tip-n{font-family:'Bebas Neue',sans-serif; font-size:1rem; opacity:0.6;}
+  .tip p{font-weight:700; font-size:1.05rem; margin-top:10px;}
+
+  /* ---------- GLOSSARY ---------- */
+  .gloss{border-top:2px solid var(--chalk);}
+  .gterm{ border-bottom:1px solid rgba(244,246,239,0.2); }
+  .gterm button{ width:100%; text-align:left; background:none; border:none; color:inherit; font-family:'Inter',sans-serif; font-weight:700; font-size:1.05rem; padding:18px 0; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+  .gterm .plus{ font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--accent); transition:transform .2s ease; }
+  .gterm[aria-expanded="true"] .plus{transform:rotate(45deg);}
+  .gterm-panel{ max-height:0; overflow:hidden; transition:max-height .25s ease; font-size:0.95rem; color:#C9D6C6; }
+  .gterm-panel p{ padding-bottom:18px; max-width:58ch; }
+
+  /* ---------- FOOTER / CTA ---------- */
+  .cta{ background:var(--accent); padding:70px 0; text-align:center; border-top:6px solid var(--ink); transition:background .2s ease; }
+  .cta h2{font-size:clamp(2.2rem,6vw,3.6rem); max-width:16ch; margin:0 auto 18px;}
+  .cta p{max-width:48ch; margin:0 auto; font-size:1.05rem;}
+  footer{ background:var(--ink); color:#8b9488; padding:26px 0; font-size:0.85rem; text-align:center; }
+
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{transition:none !important;} }
+</style>
+</head>
+<body data-sport="soccer">
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="nav-mark" href="#top"><span class="dot"></span>FANTASY DRAFT 101</a>
+    <div class="sport-tabs" role="group" aria-label="Choose a sport">
+      <button class="sport-tab" data-sport-btn="soccer" aria-pressed="true">Soccer</button>
+      <button class="sport-tab" data-sport-btn="nfl" aria-pressed="false">Football</button>
+      <button class="sport-tab" data-sport-btn="nba" aria-pressed="false">Basketball</button>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#intro">The idea</a></li>
+      <li><a href="#draft">Draft day</a></li>
+      <li><a href="#squad">Your squad</a></li>
+      <li><a href="#scoring">Scoring</a></li>
+      <li><a href="#tips">Tips</a></li>
+      <li><a href="#glossary">Glossary</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap hero-inner">
+    <span class="kicker">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#10141A" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7l3 2-1 4h-4l-1-4 3-2z"/></svg>
+      A guide for first-time managers
+    </span>
+
+    <h1 class="display soccer-only">Draft your first fantasy soccer squad without the confusion.</h1>
+    <p class="lede soccer-only">Fantasy soccer draft turns real matches into a game you play with your class, your group chat, or your family. Here's everything you need before your first pick.</p>
+
+    <h1 class="display nfl-only">Draft your first fantasy football team without the confusion.</h1>
+    <p class="lede nfl-only">Fantasy football turns every Sunday into something worth watching. Here's how a draft actually works, before you're on the clock.</p>
+
+    <h1 class="display nba-only">Draft your first fantasy basketball squad without the confusion.</h1>
+    <p class="lede nba-only">Fantasy basketball rewards the people who pay attention night to night. Here's what to know before you're on the clock.</p>
+
+    <div class="hero-stats soccer-only">
+      <div class="stat-chip"><div class="num">15</div><div class="lbl">players on your squad</div></div>
+      <div class="stat-chip"><div class="num">11</div><div class="lbl">you start each week</div></div>
+      <div class="stat-chip"><div class="num">1</div><div class="lbl">captain, worth double points</div></div>
+    </div>
+    <div class="hero-stats nfl-only">
+      <div class="stat-chip"><div class="num">15</div><div class="lbl">players on your roster</div></div>
+      <div class="stat-chip"><div class="num">9</div><div class="lbl">starters each week</div></div>
+      <div class="stat-chip"><div class="num">17</div><div class="lbl">weeks in the season</div></div>
+    </div>
+    <div class="hero-stats nba-only">
+      <div class="stat-chip"><div class="num">13</div><div class="lbl">players on your roster</div></div>
+      <div class="stat-chip"><div class="num">8</div><div class="lbl">starters most nights</div></div>
+      <div class="stat-chip"><div class="num">82</div><div class="lbl">games in the NBA season</div></div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section id="intro">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>What is a fantasy draft, actually?</h2>
+        <span class="section-num">01 — The idea</span>
+      </div>
+      <div class="intro-grid soccer-only">
+        <div>
+          <p>Instead of watching one team, you <strong>build your own team of real players</strong> from any club in the league. When those players score goals, keep clean sheets, or rack up assists in real matches, you earn points.</p>
+          <p>A "draft" just means how you get your players. Each player can only belong to <strong>one person in your league</strong> — once a friend picks a striker, that striker is off the board for everyone else.</p>
+          <p>Most leagues run a full season, and you'll manage your squad weekly: swapping injured players, setting your starting eleven, and choosing a captain.</p>
+        </div>
+        <div class="fact-card">
+          <h3>Before you join a league, know:</h3>
+          <ul>
+            <li>How many teams are in your league (decides how many picks you get)</li>
+            <li>Whether it's a snake draft or an auction draft</li>
+            <li>The scoring rules — they're not identical everywhere</li>
+            <li>How often you can swap players (weekly or season-limited)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="intro-grid nfl-only">
+        <div>
+          <p>You build a lineup of real NFL players — a quarterback, running backs, receivers, and more — from any team. When they score touchdowns, pile up yards, or catch passes on Sunday, you earn points.</p>
+          <p>In the draft, each player is claimed by <strong>only one team in your league</strong>. Once a quarterback is picked, no one else can draft him. This is why knowing players beyond your favorite team pays off.</p>
+          <p>You set a new starting lineup every single week based on matchups, injuries, and byes — this is where fantasy football becomes a weekly habit, not a one-time event.</p>
+        </div>
+        <div class="fact-card">
+          <h3>Before you join a league, know:</h3>
+          <ul>
+            <li>Whether it's standard, PPR, or half-PPR scoring (this changes who's valuable)</li>
+            <li>League size — 10 or 12 teams is most common</li>
+            <li>Your draft position — it changes your whole strategy</li>
+            <li>Whether trades and waivers are allowed mid-season</li>
+          </ul>
+        </div>
+      </div>
+      <div class="intro-grid nba-only">
+        <div>
+          <p>You assemble a roster of real NBA players. On most nights, several of your players are in action — every point, rebound, assist, steal, and block they get adds to your score.</p>
+          <p>During the draft, each player goes to <strong>one fantasy team only</strong>. With an 82-game season and players resting or getting hurt, depth matters as much as star power.</p>
+          <p>Unlike football's once-a-week rhythm, basketball moves fast — you'll be checking your lineup several times a week as game schedules shift.</p>
+        </div>
+        <div class="fact-card">
+          <h3>Before you join a league, know:</h3>
+          <ul>
+            <li>Whether it's a points league or a categories league — they play very differently</li>
+            <li>How many games each team plays that week (schedule matters a lot)</li>
+            <li>Roster lock rules — can you swap players daily?</li>
+            <li>Injury and rest-day habits of the stars you're drafting</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="draft" class="section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How draft day works</h2>
+        <span class="section-num">02 — Draft day</span>
+      </div>
+      <p class="board-note" style="color:#C9D6C6;">The most common format across every sport here is a <strong>snake draft</strong>. Picks go in order round one, then reverse for round two, then flip back again — like a snake winding down a board. Whoever picks last in round one picks first in round two, which keeps things fair.</p>
+      <div class="snake">
+        <div class="snake-row">
+          <div class="pick you"><span class="n">1</span>You</div>
+          <div class="pick"><span class="n">2</span>Player B</div>
+          <div class="pick"><span class="n">3</span>Player C</div>
+          <div class="pick"><span class="n">4</span>Player D</div>
+        </div>
+        <div class="snake-row reverse">
+          <div class="pick"><span class="n">5</span>Player D</div>
+          <div class="pick"><span class="n">6</span>Player C</div>
+          <div class="pick"><span class="n">7</span>Player B</div>
+          <div class="pick you"><span class="n">8</span>You</div>
+        </div>
+        <div class="snake-row">
+          <div class="pick you"><span class="n">9</span>You</div>
+          <div class="pick"><span class="n">10</span>Player B</div>
+          <div class="pick"><span class="n">11</span>Player C</div>
+          <div class="pick"><span class="n">12</span>Player D</div>
+        </div>
+      </div>
+      <div class="snake-legend">
+        <span><span class="swatch" style="background:var(--gold)"></span>Your picks</span>
+        <span><span class="swatch" style="background:var(--pitch-mid)"></span>Everyone else</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="squad">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Building a squad that works</h2>
+        <span class="section-num">03 — Your squad</span>
+      </div>
+
+      <div class="pitch-wrap soccer-only">
+        <div class="field soccer" aria-hidden="true">
+          <div class="prow"><div class="player-dot">FW</div><div class="player-dot">FW</div></div>
+          <div class="prow"><div class="player-dot">MF</div><div class="player-dot">MF</div><div class="player-dot">MF</div></div>
+          <div class="prow"><div class="player-dot">DF</div><div class="player-dot">DF</div><div class="player-dot">DF</div><div class="player-dot">DF</div></div>
+          <div class="prow"><div class="player-dot gk">GK</div></div>
+        </div>
+        <ul class="formation-list">
+          <li><div><span class="role">Goalkeepers</span><span class="desc">Score for clean sheets and saves. You only need 2 — a starter and backup.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Defenders</span><span class="desc">Score for clean sheets too, plus the occasional set-piece goal.</span></div><span class="count">5</span></li>
+          <li><div><span class="role">Midfielders</span><span class="desc">The most flexible position — many rack up goals and assists both.</span></div><span class="count">5</span></li>
+          <li><div><span class="role">Forwards</span><span class="desc">Picked to score goals. Usually your highest-risk, highest-reward picks.</span></div><span class="count">3</span></li>
+        </ul>
+      </div>
+
+      <div class="pitch-wrap nfl-only">
+        <div class="field nfl" aria-hidden="true">
+          <div class="prow"><div class="player-dot">WR</div><div class="player-dot">TE</div><div class="player-dot">WR</div></div>
+          <div class="prow"><div class="player-dot">RB</div><div class="player-dot gk">QB</div><div class="player-dot">RB</div></div>
+          <div class="prow"><div class="player-dot">FLX</div></div>
+          <div class="prow"><div class="player-dot">K</div><div class="player-dot">DST</div></div>
+        </div>
+        <ul class="formation-list">
+          <li><div><span class="role">Quarterback</span><span class="desc">Throws for yards and touchdowns. Usually your highest, steadiest scorer.</span></div><span class="count">1</span></li>
+          <li><div><span class="role">Running backs</span><span class="desc">Score on the ground and often catch passes too. Scarce and valuable.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Wide receivers</span><span class="desc">Catch passes for yards and touchdowns. Deep position, lots of options.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Tight end + Flex</span><span class="desc">One tight end, plus one flexible slot for any RB, WR, or TE.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Kicker + Defense</span><span class="desc">A kicker scores on field goals; a defense/special teams unit scores on turnovers and sacks.</span></div><span class="count">2</span></li>
+        </ul>
+      </div>
+
+      <div class="pitch-wrap nba-only">
+        <div class="field nba" aria-hidden="true">
+          <div class="prow"><div class="player-dot gk">C</div></div>
+          <div class="prow"><div class="player-dot">PF</div><div class="player-dot">SF</div></div>
+          <div class="prow"><div class="player-dot">PG</div><div class="player-dot">SG</div></div>
+          <div class="prow"><div class="player-dot">UTIL</div></div>
+        </div>
+        <ul class="formation-list">
+          <li><div><span class="role">Guards (PG / SG)</span><span class="desc">Rack up assists and steals, and usually log the most minutes.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Forwards (SF / PF)</span><span class="desc">A mix of scoring and rebounding — some stretch out to the three-point line.</span></div><span class="count">2</span></li>
+          <li><div><span class="role">Center</span><span class="desc">Anchors rebounds and blocks. Fewer elite options, so they go early.</span></div><span class="count">1</span></li>
+          <li><div><span class="role">Utility / bench</span><span class="desc">Flexible slots for any position, plus bench depth for injuries and rest days.</span></div><span class="count">7</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="scoring" class="section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How points get scored</h2>
+        <span class="section-num">04 — Scoring</span>
+      </div>
+      <p class="board-note" style="color:#C9D6C6;">Exact numbers vary by league, but almost every scoring system rewards the same kinds of actions. Here's the general shape of it:</p>
+
+      <div class="score-grid soccer-only">
+        <div class="score-card"><div class="pts">+4</div><div class="what">Goal (forward)</div><div class="why">Forwards score fewer points just for playing, so goals count for more.</div></div>
+        <div class="score-card"><div class="pts">+6</div><div class="what">Goal (defender)</div><div class="why">Rarer for a defender to score, so it's worth more when it happens.</div></div>
+        <div class="score-card"><div class="pts">+3</div><div class="what">Assist</div><div class="why">Setting up a goal, for any position.</div></div>
+        <div class="score-card"><div class="pts">+4</div><div class="what">Clean sheet</div><div class="why">For goalkeepers and defenders when their team doesn't concede.</div></div>
+        <div class="score-card neg"><div class="pts">−1</div><div class="what">Yellow card</div><div class="why">Discipline matters — bookings cost you points.</div></div>
+        <div class="score-card neg"><div class="pts">−3</div><div class="what">Red card</div><div class="why">A sent-off player usually costs their team the game, and you points.</div></div>
+      </div>
+
+      <div class="score-grid nfl-only">
+        <div class="score-card"><div class="pts">+4</div><div class="what">Passing touchdown</div><div class="why">Mainly earned by quarterbacks.</div></div>
+        <div class="score-card"><div class="pts">+6</div><div class="what">Rushing or receiving TD</div><div class="why">The biggest single play for a skill-position player.</div></div>
+        <div class="score-card"><div class="pts">+1</div><div class="what">Reception (PPR)</div><div class="why">In PPR leagues, every catch counts — not just touchdowns.</div></div>
+        <div class="score-card"><div class="pts">+1</div><div class="what">Per 25 pass yards</div><div class="why">Quarterbacks rack this up steadily over a full game.</div></div>
+        <div class="score-card neg"><div class="pts">−2</div><div class="what">Interception thrown</div><div class="why">A costly mistake that cuts into a quarterback's score.</div></div>
+        <div class="score-card neg"><div class="pts">−2</div><div class="what">Fumble lost</div><div class="why">Applies to any ball-carrier who loses possession.</div></div>
+      </div>
+
+      <div class="score-grid nba-only">
+        <div class="score-card"><div class="pts">+1</div><div class="what">Point scored</div><div class="why">The baseline stat every player contributes.</div></div>
+        <div class="score-card"><div class="pts">+1.2</div><div class="what">Rebound</div><div class="why">Favors bigs who crash the boards on both ends.</div></div>
+        <div class="score-card"><div class="pts">+1.5</div><div class="what">Assist</div><div class="why">Rewards playmaking guards who set up teammates.</div></div>
+        <div class="score-card"><div class="pts">+3</div><div class="what">Steal</div><div class="why">Harder to come by, so it's weighted heavily.</div></div>
+        <div class="score-card"><div class="pts">+3</div><div class="what">Block</div><div class="why">Mostly earned by centers and forwards near the rim.</div></div>
+        <div class="score-card neg"><div class="pts">−1</div><div class="what">Turnover</div><div class="why">Giving up the ball costs you — ball-dominant players take the hit most.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tips">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Rookie manager tips</h2>
+        <span class="section-num">05 — Before you pick</span>
+      </div>
+
+      <div class="tip-grid soccer-only">
+        <div class="tip"><span class="tip-n">Tip 01</span><p>Don't draft your favorite team. Spread picks across clubs so one bad match day doesn't wreck your score.</p></div>
+        <div class="tip"><span class="tip-n">Tip 02</span><p>Midfielders who take penalties or free kicks are some of the safest picks — goals and assists both.</p></div>
+        <div class="tip"><span class="tip-n">Tip 03</span><p>Check the fixture list before you draft. Easy upcoming matches make a player worth more short-term.</p></div>
+        <div class="tip"><span class="tip-n">Tip 04</span><p>Save your captain pick for someone with a favorable matchup that week — it's worth double points.</p></div>
+        <div class="tip"><span class="tip-n">Tip 05</span><p>Injuries happen. Keep one or two bench players who could start if a starter goes down.</p></div>
+        <div class="tip"><span class="tip-n">Tip 06</span><p>Early picks matter most, but mid-to-late rounds are where leagues are actually won or lost.</p></div>
+      </div>
+
+      <div class="tip-grid nfl-only">
+        <div class="tip"><span class="tip-n">Tip 01</span><p>Running backs tend to get drafted early because there are fewer reliable ones than at other positions.</p></div>
+        <div class="tip"><span class="tip-n">Tip 02</span><p>Check the bye week schedule before drafting two players at the same position for the same week.</p></div>
+        <div class="tip"><span class="tip-n">Tip 03</span><p>A "handcuff" is the backup to your star running back — worth rostering in case of injury.</p></div>
+        <div class="tip"><span class="tip-n">Tip 04</span><p>Don't draft a kicker or defense early. They're replaceable almost every week off the waiver wire.</p></div>
+        <div class="tip"><span class="tip-n">Tip 05</span><p>Know your league's scoring before you draft — PPR makes pass-catching running backs far more valuable.</p></div>
+        <div class="tip"><span class="tip-n">Tip 06</span><p>Target receivers whose quarterback throws often. The offense's scheme matters as much as talent.</p></div>
+      </div>
+
+      <div class="tip-grid nba-only">
+        <div class="tip"><span class="tip-n">Tip 01</span><p>In points leagues, prioritize players who do a little of everything — points, boards, and assists all add up.</p></div>
+        <div class="tip"><span class="tip-n">Tip 02</span><p>In category leagues, consider "punting" a category you can't win and loading up on the rest.</p></div>
+        <div class="tip"><span class="tip-n">Tip 03</span><p>Check which teams play more games that week — more games usually means more fantasy points.</p></div>
+        <div class="tip"><span class="tip-n">Tip 04</span><p>Injury-prone stars can still be worth drafting, just not with your very first pick.</p></div>
+        <div class="tip"><span class="tip-n">Tip 05</span><p>Streaming — picking up a player just for one favorable game — is a legit weekly strategy.</p></div>
+        <div class="tip"><span class="tip-n">Tip 06</span><p>Centers and point guards tend to be the scarcest positions — don't wait too long on either.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="glossary" class="section-alt">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Quick glossary</h2>
+        <span class="section-num">06 — Terms to know</span>
+      </div>
+
+      <div class="gloss soccer-only">
+        <div class="gterm"><button aria-expanded="false">Waiver wire <span class="plus">+</span></button><div class="gterm-panel"><p>The pool of undrafted players. If someone breaks out mid-season, you can claim them, usually dropping someone else to make room.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Starting XI <span class="plus">+</span></button><div class="gterm-panel"><p>The 11 players from your squad you set to score points that week. Everyone else sits on your bench and earns nothing.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Captain / vice-captain <span class="plus">+</span></button><div class="gterm-panel"><p>Your captain earns double points that week. The vice-captain is the backup if your captain doesn't play.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Transfer <span class="plus">+</span></button><div class="gterm-panel"><p>Swapping one of your players for a different one. Extra transfers beyond your free limit usually cost points.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Auction draft <span class="plus">+</span></button><div class="gterm-panel"><p>An alternative to a snake draft — everyone gets a fake budget and bids on players one at a time.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Clean sheet <span class="plus">+</span></button><div class="gterm-panel"><p>When a team finishes a match without conceding. Good news for owners of their goalkeeper or defenders.</p></div></div>
+      </div>
+
+      <div class="gloss nfl-only">
+        <div class="gterm"><button aria-expanded="false">PPR <span class="plus">+</span></button><div class="gterm-panel"><p>Points Per Reception — a scoring style where every catch earns a point, making pass-catchers more valuable.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Flex <span class="plus">+</span></button><div class="gterm-panel"><p>A lineup slot that can be filled by a running back, wide receiver, or tight end — whichever you choose.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Bye week <span class="plus">+</span></button><div class="gterm-panel"><p>Every NFL team sits out one week during the season. A player on bye scores zero, so plan your lineup around it.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Handcuff <span class="plus">+</span></button><div class="gterm-panel"><p>Drafting the backup to a star running back, so you're covered if the starter gets hurt.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Waiver wire <span class="plus">+</span></button><div class="gterm-panel"><p>The pool of undrafted free agents. A breakout player mid-season is usually picked up here first.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">DST <span class="plus">+</span></button><div class="gterm-panel"><p>Defense/Special Teams — you draft an entire team's defensive unit as one roster spot.</p></div></div>
+      </div>
+
+      <div class="gloss nba-only">
+        <div class="gterm"><button aria-expanded="false">Points league <span class="plus">+</span></button><div class="gterm-panel"><p>Every stat is converted into a single point total — simplest format, close to real basketball value.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Category league <span class="plus">+</span></button><div class="gterm-panel"><p>You compete head-to-head across several separate stats, like rebounds or steals, rather than one combined score.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Punting <span class="plus">+</span></button><div class="gterm-panel"><p>Deliberately giving up on one stat category to stack your roster with strength in the rest.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Streaming <span class="plus">+</span></button><div class="gterm-panel"><p>Picking up a bench player just because they have a favorable game or two that week, then dropping them after.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Double-double <span class="plus">+</span></button><div class="gterm-panel"><p>Reaching double digits in two stat categories in one game — commonly points and rebounds, or points and assists.</p></div></div>
+        <div class="gterm"><button aria-expanded="false">Back-to-back <span class="plus">+</span></button><div class="gterm-panel"><p>Two games on consecutive nights. Stars sometimes rest for one, which matters for your weekly lineup.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="cta">
+  <div class="wrap">
+    <h2 class="display">Ready for kickoff?</h2>
+    <p>Grab a few friends, pick a scoring format, and set a draft date. The best way to learn a draft is to sit through one.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">Made for first-time fantasy managers. Rules and points shown here are common defaults — always check your own league's settings.</div>
+</footer>
+
+<script>
+  document.querySelectorAll('.gterm button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      var panel = btn.nextElementSibling;
+      btn.setAttribute('aria-expanded', String(!expanded));
+      panel.style.maxHeight = (!expanded) ? panel.scrollHeight + 'px' : 0;
+    });
+  });
+
+  document.querySelectorAll('[data-sport-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var sport = btn.getAttribute('data-sport-btn');
+      document.body.setAttribute('data-sport', sport);
+      document.querySelectorAll('[data-sport-btn]').forEach(function(b){
+        b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+      });
+      document.querySelectorAll('.gterm-panel').forEach(function(p){ p.style.maxHeight = 0; });
+      document.querySelectorAll('.gterm').forEach(function(g){ g.setAttribute('aria-expanded','false'); });
+    });
+  });
+</script>
+
+</body>
+</html>
